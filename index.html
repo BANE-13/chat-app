@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>수채의 보라보라 채팅</title>
+<title>Message with . . .</title>
 
 <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT.css" rel="stylesheet">
 
@@ -142,17 +142,20 @@ const roomTitle = document.getElementById("roomTitle");
 const chat = document.getElementById("chat");
 const msg = document.getElementById("msg");
 
-let nickname = "";
+let nickname = sessionStorage.getItem("nickname") || "";
 
 /* 3️⃣ 입장 버튼 */
 window.enterRoom = () => {
-  nickname = document.getElementById("nickname").value.trim();
+  const nick = document.getElementById("nickname").value.trim();
   const roomName = document.getElementById("roomInput").value.trim();
 
-  if (!nickname || !roomName) {
+  if (!nick || !roomName) {
     alert("닉네임과 방 이름을 입력하세요");
     return;
   }
+
+  // ⭐ 닉네임 저장
+  sessionStorage.setItem("nickname", nick);
 
   location.href = `?room=${encodeURIComponent(roomName)}`;
 };
@@ -211,4 +214,5 @@ if (room) {
 </script>
 
 </body>
+
 </html>
