@@ -169,6 +169,7 @@ const chat = document.getElementById("chat");
 const msg = document.getElementById("msg");
 
 let nickname = sessionStorage.getItem("nickname") || "";
+let lastDate = "";
 
 function formatDate(timestamp) {
   const d = new Date(timestamp);
@@ -257,5 +258,6 @@ if (room) {
 </body>
 
 </html>
+
 
 
