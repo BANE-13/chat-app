@@ -238,12 +238,31 @@ if (room) {
         const b = document.createElement("div");
         b.className = "bubble " + (d.name === nickname ? "me" : "other");
 
-        if (d.name !== nickname) {
-          const n = document.createElement("div");
-          n.className = "name";
-          n.textContent = d.name;
-          b.appendChild(n);
-        }
+// 말풍선
+const b = document.createElement("div");
+b.className = "bubble " + (d.name === nickname ? "me" : "other");
+
+// ⭐ 상대방이면 닉네임 표시
+if (d.name !== nickname) {
+  const n = document.createElement("div");
+  n.className = "name";
+  n.textContent = d.name;
+  b.appendChild(n);
+}
+
+// 메시지 텍스트
+const textDiv = document.createElement("div");
+textDiv.textContent = d.text;
+b.appendChild(textDiv);
+
+// 시간
+const timeDiv = document.createElement("div");
+timeDiv.className = "time";
+timeDiv.textContent = new Date(d.time).toLocaleTimeString();
+b.appendChild(timeDiv);
+
+chat.appendChild(b);
+chat.scrollTop = chat.scrollHeight;
 
         b.innerHTML += `<div>${d.text}</div><div class="time">${new Date(d.time).toLocaleTimeString()}</div>`;
         chat.appendChild(b);
@@ -258,6 +277,7 @@ if (room) {
 </body>
 
 </html>
+
 
 
 
