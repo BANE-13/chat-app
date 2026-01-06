@@ -59,8 +59,8 @@ body {
 
 .name {
   font-size: 12px;
-  opacity: 0.7;
-  margin-bottom: 2px;
+  color: #444;
+  margin: 2px 6px;
 }
 
 .time {
@@ -224,10 +224,11 @@ if (room) {
         if (e.key === "Enter") send();
       });
 
-      onChildAdded(chatRef, snap => {
-        const d = snap.val();
-          const currentDate = formatDate(d.time);
+onChildAdded(chatRef, snap => {
+  const d = snap.val();
 
+  // 📅 날짜 구분
+  const currentDate = formatDate(d.time);
   if (currentDate !== lastDate) {
     const dateDiv = document.createElement("div");
     dateDiv.className = "date-divider";
@@ -235,35 +236,31 @@ if (room) {
     chat.appendChild(dateDiv);
     lastDate = currentDate;
   }
-        const b = document.createElement("div");
-        b.className = "bubble " + (d.name === nickname ? "me" : "other");
 
-// 말풍선
-const b = document.createElement("div");
-b.className = "bubble " + (d.name === nickname ? "me" : "other");
+  // ⭐ 상대방 닉네임 (말풍선 밖)
+  if (d.name !== nickname) {
+    const nameDiv = document.createElement("div");
+    nameDiv.className = "name";
+    nameDiv.textContent = d.name;
+    chat.appendChild(nameDiv);
+  }
 
-// ⭐ 상대방이면 닉네임 표시
-if (d.name !== nickname) {
-  const n = document.createElement("div");
-  n.className = "name";
-  n.textContent = d.name;
-  b.appendChild(n);
-}
+  // 💬 말풍선
+  const b = document.createElement("div");
+  b.className = "bubble " + (d.name === nickname ? "me" : "other");
 
-// 메시지 텍스트
-const textDiv = document.createElement("div");
-textDiv.textContent = d.text;
-b.appendChild(textDiv);
+  const textDiv = document.createElement("div");
+  textDiv.textContent = d.text;
+  b.appendChild(textDiv);
 
-// 시간
-const timeDiv = document.createElement("div");
-timeDiv.className = "time";
-timeDiv.textContent = new Date(d.time).toLocaleTimeString();
-b.appendChild(timeDiv);
+  const timeDiv = document.createElement("div");
+  timeDiv.className = "time";
+  timeDiv.textContent = new Date(d.time).toLocaleTimeString();
+  b.appendChild(timeDiv);
 
-chat.appendChild(b);
-chat.scrollTop = chat.scrollHeight;
-
+  chat.appendChild(b);
+  chat.scrollTop = chat.scrollHeight;
+});
         b.innerHTML += `<div>${d.text}</div><div class="time">${new Date(d.time).toLocaleTimeString()}</div>`;
         chat.appendChild(b);
         chat.scrollTop = chat.scrollHeight;
@@ -277,6 +274,7 @@ chat.scrollTop = chat.scrollHeight;
 </body>
 
 </html>
+
 
 
 
