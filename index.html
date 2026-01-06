@@ -165,6 +165,7 @@ if (room) {
   enterScreen.style.display = "none";
   chatBox.style.display = "block";
   roomTitle.textContent = `💬 ${room}`;
+  nickname = sessionStorage.getItem("nickname");
 
   import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js").then(({ initializeApp }) => {
     import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js").then(({ getDatabase, ref, push, onChildAdded }) => {
@@ -216,3 +217,4 @@ if (room) {
 </body>
 
 </html>
+
