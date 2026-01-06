@@ -194,10 +194,17 @@ window.enterRoom = () => {
 
 /* 4️⃣ room 있을 때만 Firebase 시작 */
 if (room) {
+  nickname = sessionStorage.getItem("nickname");
+
+  // ⭐ 닉네임 없으면 입장 화면으로
+  if (!nickname) {
+    location.href = location.pathname;
+    return;
+  }
+
   enterScreen.style.display = "none";
   chatBox.style.display = "block";
   roomTitle.textContent = `💬 ${room}`;
-  nickname = sessionStorage.getItem("nickname");
 
   import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js").then(({ initializeApp }) => {
     import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js").then(({ getDatabase, ref, push, onChildAdded }) => {
@@ -274,6 +281,7 @@ onChildAdded(chatRef, snap => {
 </body>
 
 </html>
+
 
 
 
