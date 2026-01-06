@@ -268,10 +268,7 @@ onChildAdded(chatRef, snap => {
   chat.appendChild(b);
   chat.scrollTop = chat.scrollHeight;
 });
-        b.innerHTML += `<div>${d.text}</div><div class="time">${new Date(d.time).toLocaleTimeString()}</div>`;
-        chat.appendChild(b);
-        chat.scrollTop = chat.scrollHeight;
-      });
+
 
     });
   });
@@ -281,6 +278,7 @@ onChildAdded(chatRef, snap => {
 </body>
 
 </html>
+
 
 
 
