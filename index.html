@@ -131,34 +131,36 @@ button {
 
 <script type="module">
 
-/* 1️⃣ room 확인 */
+/* 1️⃣ URL에서 room과 nickname 정보 가져오기 */
 const params = new URLSearchParams(location.search);
 const room = params.get("room");
+const savedNickname = params.get("nickname"); // 추가된 부분
 
-/* 2️⃣ DOM */
+/* 2️⃣ DOM 요소 선언 */
 const enterScreen = document.getElementById("enterScreen");
 const chatBox = document.getElementById("chatBox");
 const roomTitle = document.getElementById("roomTitle");
 const chat = document.getElementById("chat");
 const msg = document.getElementById("msg");
 
-let nickname = "";
+let nickname = savedNickname || ""; // 페이지 로드 시 닉네임 설정
 
-/* 3️⃣ 입장 버튼 */
+/* 3️⃣ 입장 버튼 함수 (전역 등록) */
 window.enterRoom = () => {
-  nickname = document.getElementById("nickname").value.trim();
-  const roomName = document.getElementById("roomInput").value.trim();
+  const nickInput = document.getElementById("nickname").value.trim();
+  const roomInput = document.getElementById("roomInput").value.trim();
 
-  if (!nickname || !roomName) {
+  if (!nickInput || !roomInput) {
     alert("닉네임과 방 이름을 입력하세요");
     return;
   }
 
-  location.href = `?room=${encodeURIComponent(roomName)}`;
+  // 닉네임과 방 이름을 모두 URL에 담아서 페이지를 다시 부릅니다.
+  location.href = `?room=${encodeURIComponent(roomInput)}&nickname=${encodeURIComponent(nickInput)}`;
 };
 
-/* 4️⃣ room 있을 때만 Firebase 시작 */
-if (room) {
+/* 4️⃣ room과 nickname이 모두 있을 때만 채팅 시작 */
+if (room && nickname) {
   enterScreen.style.display = "none";
   chatBox.style.display = "block";
   roomTitle.textContent = `💬 ${room}`;
@@ -174,25 +176,31 @@ if (room) {
       const db = getDatabase(app);
       const chatRef = ref(db, `chat/${room}`);
 
+      // 메시지 전송 함수
       window.send = () => {
-        if (!msg.value.trim()) return;
+        const text = msg.value.trim();
+        if (!text) return;
+        
         push(chatRef, {
           name: nickname,
-          text: msg.value,
+          text: text,
           time: Date.now()
         });
         msg.value = "";
       };
 
+      // 엔터키 처리
       msg.addEventListener("keydown", e => {
         if (e.key === "Enter") send();
       });
 
+      // 실시간 메시지 수신 및 화면 표시
       onChildAdded(chatRef, snap => {
         const d = snap.val();
         const b = document.createElement("div");
         b.className = "bubble " + (d.name === nickname ? "me" : "other");
 
+        // 상대방 이름 표시
         if (d.name !== nickname) {
           const n = document.createElement("div");
           n.className = "name";
@@ -200,15 +208,30 @@ if (room) {
           b.appendChild(n);
         }
 
-        b.innerHTML += `<div>${d.text}</div><div class="time">${new Date(d.time).toLocaleTimeString()}</div>`;
+        // 메시지 내용 (XSS 방지를 위해 textContent 사용)
+        const t = document.createElement("div");
+        t.textContent = d.text;
+        b.appendChild(t);
+
+        // 시간 표시
+        const tm = document.createElement("div");
+        tm.className = "time";
+        tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        b.appendChild(tm);
+
         chat.appendChild(b);
-        chat.scrollTop = chat.scrollHeight;
+        chat.scrollTop = chat.scrollHeight; // 스크롤 하단 이동
       });
 
     });
   });
+} else if (room && !nickname) {
+  // 방 이름은 있는데 닉네임이 없는 경우 다시 입력창으로 보냄
+  alert("닉네임을 먼저 입력해주세요.");
+  location.href = window.location.pathname; 
 }
 </script>
 
 </body>
 </html>
+
