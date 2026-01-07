@@ -195,7 +195,6 @@ onChildAdded(chatRef, snap => {
   const msgKey = snap.key;
   const isMe = d.name === nickname;
 
-  // 1. 전체 감싸는 상자 (정렬)
   const wrapper = document.createElement("div");
   wrapper.id = `wrapper-${msgKey}`;
   wrapper.style.marginBottom = "15px";
@@ -204,7 +203,6 @@ onChildAdded(chatRef, snap => {
   wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
   wrapper.style.width = "100%";
 
-  // 2. 이름
   if (!isMe) {
     const n = document.createElement("div");
     n.className = "name";
@@ -214,41 +212,39 @@ onChildAdded(chatRef, snap => {
     wrapper.appendChild(n);
   }
 
-  // 3. 말풍선과 버튼 묶음
+  // [수정 포인트] 가로 상자가 필요한 만큼만 가로 길이를 가지도록 설정
   const line = document.createElement("div");
   line.style.display = "flex";
-  line.style.alignItems = "flex-end"; // 아래쪽 기준 정렬
+  line.style.alignItems = "flex-end";
   line.style.gap = "8px";
   line.style.flexDirection = isMe ? "row-reverse" : "row";
-  line.style.width = "100%"; // 꽉 채우기
-  line.style.justifyContent = isMe ? "flex-start" : "flex-start"; // 방향 유지
+  line.style.width = "max-content"; // 핵심: 내용물만큼만 가로 길이 차지
+  line.style.maxWidth = "85%";     // 화면의 85% 넘지 않게
 
-  // 4. 말풍선 (핵심: 너비 문제 해결)
   const b = document.createElement("div");
   b.className = "bubble " + (isMe ? "me" : "other");
   b.textContent = d.text;
   
-  // 스타일 강제 고정 (세로 방지)
-  b.style.display = "inline-block"; // flex 해제
-  b.style.width = "auto";           // 너비 자동
-  b.style.minWidth = "20px";        // 최소 너비
-  b.style.wordBreak = "break-all";  // 긴 단어 끊기
-  b.style.margin = "0";             // 마진 제거
+  // 말풍선 스타일 보강 (세로 방지)
+  b.style.display = "block";
+  b.style.margin = "0";
+  b.style.wordBreak = "break-word"; // 긴 문장은 줄바꿈
   line.appendChild(b);
 
-  // 5. 삭제 버튼 (길어짐 방지)
+  // 삭제 버튼 로직
   get(infoRef).then(infoSnap => {
     if (infoSnap.exists() && infoSnap.val().host === nickname) {
       const delBtn = document.createElement("button");
       delBtn.innerHTML = "✕";
       delBtn.className = "del-btn";
       
-      // 버튼 모양 고정
-      delBtn.style.flexShrink = "0";  // 찌그러짐 방지
-      delBtn.style.height = "24px";   // 높이 고정 (길어짐 방지)
-      delBtn.style.width = "24px";    // 너비 고정
+      // 버튼 모양 완전 고정
+      delBtn.style.flexShrink = "0"; 
+      delBtn.style.width = "22px";   
+      delBtn.style.height = "22px";  
       delBtn.style.padding = "0";
-      delBtn.style.display = "flex";
+      delBtn.style.margin = "0";
+      delBtn.style.display = "inline-flex";
       delBtn.style.alignItems = "center";
       delBtn.style.justifyContent = "center";
       
@@ -259,7 +255,6 @@ onChildAdded(chatRef, snap => {
 
   wrapper.appendChild(line);
 
-  // 6. 시간
   const tm = document.createElement("div");
   tm.className = "time";
   tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -281,6 +276,7 @@ onChildAdded(chatRef, snap => {
 </script>
 </body>
 </html>
+
 
 
 
