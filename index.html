@@ -189,7 +189,7 @@ if (text.startsWith("/공지")) {
       
       msg.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
-// [메시지 수신 - 말풍선 너비 수정 버전]
+// [메시지 수신 - 중복 제거 및 레이아웃 교정 버전]
 onChildAdded(chatRef, snap => {
   const d = snap.val();
   const msgKey = snap.key;
@@ -201,9 +201,9 @@ onChildAdded(chatRef, snap => {
   wrapper.style.flexDirection = "column";
   wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
   wrapper.style.marginBottom = "15px";
-  wrapper.style.width = "100%"; // 전체 너비 확보
+  wrapper.style.width = "100%";
 
-  // 1. 상대방 닉네임 표시
+  // 1. 상대방 닉네임
   if (!isMe) {
     const n = document.createElement("div");
     n.className = "name";
@@ -213,40 +213,42 @@ onChildAdded(chatRef, snap => {
     wrapper.appendChild(n);
   }
 
-  // 2. 가로 배치용 컨테이너 (중요: width를 max-content로!)
+  // 2. 가로 배치 박스 (말풍선 + 삭제버튼)
   const messageLine = document.createElement("div");
   messageLine.style.display = "flex";
   messageLine.style.alignItems = "center";
   messageLine.style.gap = "8px"; 
   messageLine.style.flexDirection = isMe ? "row-reverse" : "row";
-  messageLine.style.width = "max-content"; // 말풍선 내용만큼만 가로 길이 설정
-  messageLine.style.maxWidth = "100%";     // 너무 길어지면 줄바꿈
+  messageLine.style.maxWidth = "85%"; // 전체 화면의 85%까지만 차지
 
   // 3. 말풍선 생성
   const b = document.createElement("div");
   b.className = "bubble " + (isMe ? "me" : "other");
   b.textContent = d.text;
-  b.style.margin = "0";
+  b.style.margin = "0"; // 중복 마진 제거
 
-  // 4. 삭제 버튼 로직
+  // 4. 삭제 버튼 로직 (방장일 때만 messageLine에 추가)
   get(infoRef).then(infoSnap => {
     if (infoSnap.exists() && infoSnap.val().host === nickname) {
       const delBtn = document.createElement("button");
       delBtn.innerHTML = "✕";
       delBtn.className = "del-btn";
-      delBtn.style.flexShrink = "0"; // 버튼이 찌그러지지 않게 설정
+      delBtn.style.flexShrink = "0"; 
       delBtn.onclick = () => { if(confirm("삭제할까요?")) remove(ref(db, `chat/${room}/messages/${msgKey}`)); };
       messageLine.appendChild(delBtn); 
     }
   });
 
+  // [중요!] 여기서 말풍선을 messageLine에 딱 한 번만 넣습니다.
   messageLine.appendChild(b);
-  wrapper.appendChild(messageLine);
 
   // 5. 시간 표시
   const tm = document.createElement("div");
   tm.className = "time";
   tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // 최종 조립: wrapper에 [가로 박스]와 [시간]만 순서대로 넣음
+  wrapper.appendChild(messageLine);
   wrapper.appendChild(tm);
 
   chat.appendChild(wrapper);
@@ -265,6 +267,7 @@ onChildAdded(chatRef, snap => {
 </script>
 </body>
 </html>
+
 
 
 
