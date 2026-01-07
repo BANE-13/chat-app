@@ -63,11 +63,12 @@ body {
 }
 
 .name {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
-  color: #555;
-  margin-bottom: 4px;
-  margin-left: 2px;
+  color: #777;
+  margin-bottom: 2px;
+  margin-left: 5px;
+  margin-top: 10px
 }
 
 .time {
@@ -202,32 +203,46 @@ if (room && nickname) {
         if (e.key === "Enter") send();
       });
 
-      // 실시간 메시지 수신 및 화면 표시
+// 실시간 메시지 수신 및 화면 표시
       onChildAdded(chatRef, snap => {
         const d = snap.val();
-        const b = document.createElement("div");
-        b.className = "bubble " + (d.name === nickname ? "me" : "other");
+        const isMe = d.name === nickname;
 
-        // 상대방 이름 표시
-        if (d.name !== nickname) {
+        // 1. 메시지 묶음(wrapper) 생성
+        const wrapper = document.createElement("div");
+        wrapper.style.clear = "both";
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
+        wrapper.style.width = "100%";
+
+        // 2. 상대방일 경우에만 닉네임 추가
+        if (!isMe) {
           const n = document.createElement("div");
           n.className = "name";
           n.textContent = d.name;
-          chat.appendChild(n);
+          wrapper.appendChild(n);
         }
 
-        // 메시지 내용 (XSS 방지를 위해 textContent 사용)
+        // 3. 말풍선 생성
+        const b = document.createElement("div");
+        b.className = "bubble " + (isMe ? "me" : "other");
+
+        // 4. 메시지 텍스트
         const t = document.createElement("div");
         t.textContent = d.text;
         b.appendChild(t);
 
-        // 시간 표시
+        // 5. 시간 표시
         const tm = document.createElement("div");
         tm.className = "time";
         tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         b.appendChild(tm);
 
-        chat.appendChild(b);
+        // wrapper에 말풍선 넣고, 최종적으로 채팅창에 추가
+        wrapper.appendChild(b);
+        chat.appendChild(wrapper);
+        
         chat.scrollTop = chat.scrollHeight; // 스크롤 하단 이동
       });
 
@@ -242,6 +257,7 @@ if (room && nickname) {
 
 </body>
 </html>
+
 
 
 
