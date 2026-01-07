@@ -130,10 +130,10 @@ button {
 
 <!-- 입장 화면 -->
 <div id="enterScreen">
-  <h3>채팅 입장</h3>
-  <input id="nickname" placeholder="닉네임">
-  <input id="roomInput" placeholder="방 이름">
-  <button onclick="enterRoom()">입장하기</button>
+  <h3>Hello! chatting with your friends!</h3>
+  <input id="nickname" placeholder="Nickname">
+  <input id="roomInput" placeholder="Chatting room name">
+  <button onclick="enterRoom()">Let's go!</button>
 </div>
 
 <!-- 채팅 화면 -->
@@ -148,13 +148,10 @@ button {
 </div>
 
 <script type="module">
-
-/* 1️⃣ URL에서 room과 nickname 정보 가져오기 */
 const params = new URLSearchParams(location.search);
 const room = params.get("room");
 const savedNickname = params.get("nickname"); // 추가된 부분
 
-/* 2️⃣ DOM 요소 선언 */
 const enterScreen = document.getElementById("enterScreen");
 const chatBox = document.getElementById("chatBox");
 const roomTitle = document.getElementById("roomTitle");
@@ -163,7 +160,6 @@ const msg = document.getElementById("msg");
 
 let nickname = savedNickname || ""; // 페이지 로드 시 닉네임 설정
 
-/* 3️⃣ 입장 버튼 함수 (전역 등록) */
 window.enterRoom = () => {
   const nickInput = document.getElementById("nickname").value.trim();
   const roomInput = document.getElementById("roomInput").value.trim();
@@ -172,29 +168,52 @@ window.enterRoom = () => {
     alert("닉네임과 방 이름을 입력하세요");
     return;
   }
-
-  // 닉네임과 방 이름을 모두 URL에 담아서 페이지를 다시 부릅니다.
   location.href = `?room=${encodeURIComponent(roomInput)}&nickname=${encodeURIComponent(nickInput)}`;
 };
 
-/* 4️⃣ room과 nickname이 모두 있을 때만 채팅 시작 */
 if (room && nickname) {
   enterScreen.style.display = "none";
   chatBox.style.display = "block";
   roomTitle.textContent = `💬 ${room}`;
 
   import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js").then(({ initializeApp }) => {
-    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js").then(({ getDatabase, ref, push, onChildAdded }) => {
+    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js").then(({ getDatabase, ref, push, onChildAdded, get, set }) => {
 
-      const app = initializeApp({
+const firebaseConfig = {
         apiKey: "AIzaSyBeMC5TQ7Jynxjpr_kjhijGUvZyly2D_gs",
         databaseURL: "https://my-chat-app-241e8-default-rtdb.firebaseio.com"
-      });
+      };
 
+      const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
-      const chatRef = ref(db, `chat/${room}`);
+      const chatRef = ref(db, `chat/${room}/messages`);
+      const infoRef = ref(db, `chat/${room}/info`);
+      
+let isHost = false;
 
-      // 메시지 전송 함수
+// [방장 확인 및 비밀번호 설정 로직]
+      get(infoRef).then((snapshot) => {
+        if (!snapshot.exists()) {
+          const hostPw = prompt("이 방의 방장 비밀번호를 설정하세요:");
+          if (hostPw) {
+            set(infoRef, { host: nickname, pw: hostPw });
+            isHost = true;
+            roomTitle.innerHTML += ` <span style="font-size:12px; color:gold;">👑 방장</span>`;
+          }
+        } else {
+          const data = snapshot.val();
+          if (data.host === nickname) {
+            const inputPw = prompt("방장 비밀번호를 입력하세요:");
+            if (inputPw === data.pw) {
+              isHost = true;
+              roomTitle.innerHTML += ` <span style="font-size:12px; color:gold;">👑 방장</span>`;
+            } else {
+              alert("비밀번호가 틀려 일반 사용자로 입장합니다.");
+            }
+          }
+        }
+      });
+      
       window.send = () => {
         const text = msg.value.trim();
         if (!text) return;
@@ -230,7 +249,16 @@ if (room && nickname) {
         if (!isMe) {
           const n = document.createElement("div");
           n.className = "name";
-          n.textContent = d.name;
+
+// 추가: 방장 정보(infoRef)를 확인해서 이름 옆에 왕관 붙이기
+    get(infoRef).then(infoSnap => {
+      if (infoSnap.exists() && infoSnap.val().host === d.name) {
+        n.textContent = `👑 ${d.name}`; 
+      } else {
+        n.textContent = d.name;
+      }
+    });
+          
           wrapper.appendChild(n);
         }
 
@@ -264,6 +292,7 @@ if (room && nickname) {
 
 </body>
 </html>
+
 
 
 
