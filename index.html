@@ -69,8 +69,16 @@ body { font-family: 'SUIT', sans-serif; background: #ececec; }
   transform: scale(1.1);           /* 살짝 커지는 효과 */
 }
   
-/* 푸터 스타일 */
-.footer { text-align: center; font-size: 11px; color: #999; margin-top: 15px; margin-bottom: 10px; letter-spacing: 0.5px; }
+/* 푸터 스타일 수정 */
+.footer { 
+  text-align: center; 
+  font-size: 11px; 
+  color: #bbb; /* 색상을 조금 더 연하게 조정 */
+  margin-top: 15px; 
+  margin-bottom: 10px; 
+  letter-spacing: 0.5px; 
+  word-break: keep-all; /* 주소 등이 끊기지 않게 */
+}
 
 input { width: 100%; margin: 6px 0; padding: 10px; border-radius: 20px; border: none; outline: none; box-sizing: border-box; }
 button { width: 100%; padding: 10px; border-radius: 20px; border: none; background: #664b7d; color: white; cursor: pointer; }
@@ -88,6 +96,7 @@ button { width: 100%; padding: 10px; border-radius: 20px; border: none; backgrou
   <input id="nickname" placeholder="Nickname">
   <input id="roomInput" placeholder="Chatting room name">
   <button onclick="enterRoom()">Let's go!</button>
+  <div class="footer" style="margin-top: 20px;">made by 유수채 - 문의는 instagram @weso.alive</div>
 </div>
 
 <div id="chatBox">
@@ -285,6 +294,7 @@ onChildAdded(chatRef, snap => {
 </script>
 </body>
 </html>
+
 
 
 
