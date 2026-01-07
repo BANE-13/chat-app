@@ -202,7 +202,7 @@ onChildAdded(chatRef, snap => {
   wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
   wrapper.style.marginBottom = "15px";
 
-  // 1. 닉네임 설정 (상대방일 경우)
+  // 1. 상대방 닉네임 표시
   if (!isMe) {
     const n = document.createElement("div");
     n.className = "name";
@@ -212,32 +212,45 @@ onChildAdded(chatRef, snap => {
     wrapper.appendChild(n);
   }
 
-  // 2. 말풍선 설정
+  // 2. 가로 배치용 컨테이너 (말풍선 + 삭제버튼)
+  const messageLine = document.createElement("div");
+  messageLine.style.display = "flex";
+  messageLine.style.alignItems = "center";
+  messageLine.style.gap = "8px"; 
+  messageLine.style.flexDirection = isMe ? "row-reverse" : "row"; 
+
+  // 3. 말풍선 생성
   const b = document.createElement("div");
   b.className = "bubble " + (isMe ? "me" : "other");
   b.textContent = d.text;
+  b.style.margin = "0";
 
-  // 3. 삭제 버튼 추가 로직 (방장 정보 다시 확인)
+  // 4. 삭제 버튼 로직 (방장일 때만 옆에 생성)
   get(infoRef).then(infoSnap => {
-    // 현재 접속한 닉네임이 방장 닉네임과 같다면 삭제 버튼 생성
     if (infoSnap.exists() && infoSnap.val().host === nickname) {
       const delBtn = document.createElement("button");
       delBtn.innerHTML = "✕";
       delBtn.className = "del-btn";
       delBtn.onclick = () => { if(confirm("삭제할까요?")) remove(ref(db, `chat/${room}/messages/${msgKey}`)); };
-      b.appendChild(delBtn);
+      messageLine.appendChild(delBtn); 
     }
   });
 
+  // 컨테이너에 말풍선 넣기
+  messageLine.appendChild(b);
+  // 전체 묶음에 컨테이너 넣기
+  wrapper.appendChild(messageLine);
+
+  // 5. 시간 표시 (컨테이너 아래에 별도로 추가)
   const tm = document.createElement("div");
   tm.className = "time";
   tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  wrapper.appendChild(b);
   wrapper.appendChild(tm);
+
   chat.appendChild(wrapper);
   chat.scrollTop = chat.scrollHeight;
 });
+      
       // [실시간 삭제 반영]
       onChildRemoved(chatRef, snap => {
         const removedMsg = document.getElementById(`wrapper-${snap.key}`);
@@ -250,4 +263,5 @@ onChildAdded(chatRef, snap => {
 </script>
 </body>
 </html>
+
 
