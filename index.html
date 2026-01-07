@@ -189,7 +189,7 @@ if (text.startsWith("/공지")) {
       
       msg.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
-// [메시지 수신]
+// [메시지 수신 - 말풍선 너비 수정 버전]
 onChildAdded(chatRef, snap => {
   const d = snap.val();
   const msgKey = snap.key;
@@ -201,6 +201,7 @@ onChildAdded(chatRef, snap => {
   wrapper.style.flexDirection = "column";
   wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
   wrapper.style.marginBottom = "15px";
+  wrapper.style.width = "100%"; // 전체 너비 확보
 
   // 1. 상대방 닉네임 표시
   if (!isMe) {
@@ -212,12 +213,14 @@ onChildAdded(chatRef, snap => {
     wrapper.appendChild(n);
   }
 
-  // 2. 가로 배치용 컨테이너 (말풍선 + 삭제버튼)
+  // 2. 가로 배치용 컨테이너 (중요: width를 max-content로!)
   const messageLine = document.createElement("div");
   messageLine.style.display = "flex";
   messageLine.style.alignItems = "center";
   messageLine.style.gap = "8px"; 
-  messageLine.style.flexDirection = isMe ? "row-reverse" : "row"; 
+  messageLine.style.flexDirection = isMe ? "row-reverse" : "row";
+  messageLine.style.width = "max-content"; // 말풍선 내용만큼만 가로 길이 설정
+  messageLine.style.maxWidth = "100%";     // 너무 길어지면 줄바꿈
 
   // 3. 말풍선 생성
   const b = document.createElement("div");
@@ -225,23 +228,22 @@ onChildAdded(chatRef, snap => {
   b.textContent = d.text;
   b.style.margin = "0";
 
-  // 4. 삭제 버튼 로직 (방장일 때만 옆에 생성)
+  // 4. 삭제 버튼 로직
   get(infoRef).then(infoSnap => {
     if (infoSnap.exists() && infoSnap.val().host === nickname) {
       const delBtn = document.createElement("button");
       delBtn.innerHTML = "✕";
       delBtn.className = "del-btn";
+      delBtn.style.flexShrink = "0"; // 버튼이 찌그러지지 않게 설정
       delBtn.onclick = () => { if(confirm("삭제할까요?")) remove(ref(db, `chat/${room}/messages/${msgKey}`)); };
       messageLine.appendChild(delBtn); 
     }
   });
 
-  // 컨테이너에 말풍선 넣기
   messageLine.appendChild(b);
-  // 전체 묶음에 컨테이너 넣기
   wrapper.appendChild(messageLine);
 
-  // 5. 시간 표시 (컨테이너 아래에 별도로 추가)
+  // 5. 시간 표시
   const tm = document.createElement("div");
   tm.className = "time";
   tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -263,5 +265,6 @@ onChildAdded(chatRef, snap => {
 </script>
 </body>
 </html>
+
 
 
