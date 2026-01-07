@@ -44,7 +44,7 @@ body {
   clear: both;
   line-height: 1.4;
   position: relative;
-  box-shadow: o 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .me {
@@ -52,7 +52,6 @@ body {
   color: white;
   float: right;
   border-radius: 18px 2px 18px 18px;
-  text-align: right;
 }
 
 .other {
@@ -74,10 +73,20 @@ body {
 .time {
   font-size: 10px;
   opacity: 0.6;
-  margin-top: 5px;
-  text-align: right;
+  margin-top: 4px;
+  clear: both;
 }
 
+.me + .time { 
+  text-align: right;
+  width: 100%
+}
+
+.other + .time {
+  text-align: left;
+  width: 100%
+}
+  
 input {
   width: 100%;
   margin: 6px 0;
@@ -227,22 +236,19 @@ if (room && nickname) {
         // 3. 말풍선 생성
         const b = document.createElement("div");
         b.className = "bubble " + (isMe ? "me" : "other");
-
-        // 4. 메시지 텍스트
         const t = document.createElement("div");
         t.textContent = d.text;
         b.appendChild(t);
+
+        wrapper.appendChild(b);
 
         // 5. 시간 표시
         const tm = document.createElement("div");
         tm.className = "time";
         tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        b.appendChild(tm);
+        wrapper.appendChild(tm);
 
-        // wrapper에 말풍선 넣고, 최종적으로 채팅창에 추가
-        wrapper.appendChild(b);
         chat.appendChild(wrapper);
-        
         chat.scrollTop = chat.scrollHeight; // 스크롤 하단 이동
       });
 
@@ -257,6 +263,7 @@ if (room && nickname) {
 
 </body>
 </html>
+
 
 
 
