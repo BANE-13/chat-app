@@ -73,7 +73,7 @@ body {
 .time {
   font-size: 10px;
   opacity: 0.6;
-  margin-top: 4px;
+  margin-top: 2px;
   clear: both;
 }
 
@@ -224,6 +224,7 @@ if (room && nickname) {
         wrapper.style.flexDirection = "column";
         wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
         wrapper.style.width = "100%";
+        wrapper.style.marginBottom = "20px";
 
         // 2. 상대방일 경우에만 닉네임 추가
         if (!isMe) {
@@ -263,6 +264,7 @@ if (room && nickname) {
 
 </body>
 </html>
+
 
 
 
