@@ -37,41 +37,44 @@ body {
 }
 
 .bubble {
-  max-width: 70%;
-  padding: 8px 12px;
-  margin: 8px 0;
-  border-radius: 12px;
+  max-width: 75%;
+  padding: 10px 15px;
+  margin: 10px 0;
   font-size: 14px;
   clear: both;
+  line-height: 1.4;
   position: relative;
-  display: block;
+  box-shadow: o 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .me {
   background: #664b7d;
   color: white;
   float: right;
-  clear: both;
+  border-radius: 18px 2px 18px 18px;
   text-align: right;
 }
 
 .other {
   background: white;
   float: left;
-  clear: both;
-  color: black;
+  border-radius: 2px 18px 18px 18px;
+  color: #333;
 }
 
 .name {
   font-size: 12px;
-  opacity: 0.7;
-  margin-bottom: 2px;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 4px;
+  margin-left: 2px;
 }
 
 .time {
-  font-size: 11px;
-  opacity: 0.8;
-  margin-top: 4px;
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 5px;
+  text-align: right;
 }
 
 input {
@@ -210,7 +213,7 @@ if (room && nickname) {
           const n = document.createElement("div");
           n.className = "name";
           n.textContent = d.name;
-          b.appendChild(n);
+          chat.appendChild(n);
         }
 
         // 메시지 내용 (XSS 방지를 위해 textContent 사용)
@@ -239,5 +242,6 @@ if (room && nickname) {
 
 </body>
 </html>
+
 
 
