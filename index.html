@@ -38,12 +38,12 @@ body {
   font-size: 1.2rem;
 }
 
-/* 채팅 상자 (모바일 기기 전체 대응) */
+/* 채팅 상자 */
 #chatBox { 
   width: 100%;
   max-width: 420px; 
   height: 100vh;
-  height: 100dvh; /* 모바일 주소창 높이 변화 대응 */
+  height: 100dvh;
   background: white;
   display: none; 
   flex-direction: column;
@@ -66,7 +66,7 @@ body {
   overflow-y: auto; 
   display: flex; 
   flex-direction: column;
-  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 말풍선 및 레이아웃 */
@@ -76,6 +76,7 @@ body {
   line-height: 1.45; 
   position: relative;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer; /* 터치 가능한 상태 표시 */
 }
 
 .me { 
@@ -106,6 +107,58 @@ body {
 
 .me + .time { text-align: right; width: 100%; }
 .other + .time { text-align: left; width: 100%; }
+
+/* 답장 메시지 내부 인용구(Quote) 스타일 */
+.reply-quote {
+  font-size: 11px;
+  padding: 6px 8px;
+  border-left: 3px solid rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+
+.other .reply-quote {
+  border-left-color: #664b7d;
+  background: #f0ebf5;
+  color: #555;
+}
+
+.reply-user {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+/* 입력창 위 답장 미리보기 바 */
+#replyPreview {
+  display: none;
+  background: #f0ebf5;
+  padding: 8px 14px;
+  font-size: 12px;
+  border-top: 1px solid #e0d5e8;
+  color: #444;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#replyPreview .reply-info {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 85%;
+}
+
+#replyPreview .cancel-reply {
+  background: none;
+  border: none;
+  color: #888;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 0 4px;
+  width: auto;
+  cursor: pointer;
+}
 
 /* 공지사항 */
 #noticeArea {
@@ -154,7 +207,7 @@ input {
   border-radius: 24px; 
   border: 1px solid #e2e2e2; 
   outline: none; 
-  font-size: 16px; /* 모바일 입력 시 줌인 방지 */
+  font-size: 16px; 
   background: #f9f9f9;
 }
 
@@ -216,6 +269,13 @@ button:active {
   <div id="chat">
     <div id="noticeArea">📌 공지: <span id="noticeText"></span></div>
   </div>
+  
+  <!-- 답장 선택 시 활성화되는 미리보기 박스 -->
+  <div id="replyPreview">
+    <div class="reply-info">↩️ <b id="replyTargetName"></b>에게 답장: <span id="replyTargetText"></span></div>
+    <button class="cancel-reply" onclick="cancelReply()">✕</button>
+  </div>
+
   <div id="inputArea">
     <input id="msg" placeholder="메시지 입력">
     <button onclick="send()">전송</button>
@@ -234,6 +294,9 @@ const roomTitle = document.getElementById("roomTitle");
 const chat = document.getElementById("chat");
 const msg = document.getElementById("msg");
 
+// 답장 상태 변수
+let targetReply = null; 
+
 let nickname = savedNickname || "";
 
 window.enterRoom = () => {
@@ -241,6 +304,21 @@ window.enterRoom = () => {
   const roomInput = document.getElementById("roomInput").value.trim();
   if (!nickInput || !roomInput) { alert("닉네임과 방 이름을 입력하세요"); return; }
   location.href = `?room=${encodeURIComponent(roomInput)}&nickname=${encodeURIComponent(nickInput)}`;
+};
+
+// 답장 설정 함수
+window.setReply = (name, text) => {
+  targetReply = { name, text };
+  document.getElementById("replyTargetName").textContent = name;
+  document.getElementById("replyTargetText").textContent = text;
+  document.getElementById("replyPreview").style.display = "flex";
+  msg.focus();
+};
+
+// 답장 취소 함수
+window.cancelReply = () => {
+  targetReply = null;
+  document.getElementById("replyPreview").style.display = "none";
 };
 
 if (room && nickname) {
@@ -306,6 +384,7 @@ if (room && nickname) {
             const noticeMsg = text.replace("/공지", "").trim();
             set(noticeRef, noticeMsg);
             msg.value = "";
+            cancelReply();
             alert("공지가 등록되었습니다.");
             return;
           } else {
@@ -313,8 +392,20 @@ if (room && nickname) {
           }
         }
 
-        push(chatRef, { name: nickname, text: text, time: Date.now() });
+        // 메시지 데이터를 보낼 때 답장 정보가 있으면 같이 기록
+        const msgData = {
+          name: nickname,
+          text: text,
+          time: Date.now()
+        };
+
+        if (targetReply) {
+          msgData.replyTo = targetReply;
+        }
+
+        push(chatRef, msgData);
         msg.value = "";
+        cancelReply(); // 전송 후 답장 상태 초기화
       };
       
       msg.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
@@ -351,8 +442,25 @@ if (room && nickname) {
 
         const b = document.createElement("div");
         b.className = "bubble " + (isMe ? "me" : "other");
-        b.textContent = d.text;
+        
+        // 답장 데이터가 포함된 메시지면 인용 박스 추가
+        if (d.replyTo) {
+          const q = document.createElement("div");
+          q.className = "reply-quote";
+          q.innerHTML = `<div class="reply-user">↪ ${d.replyTo.name}에게 답장</div>${d.replyTo.text}`;
+          b.appendChild(q);
+        }
+
+        const textSpan = document.createElement("span");
+        textSpan.textContent = d.text;
+        b.appendChild(textSpan);
         b.style.wordBreak = "break-word";
+
+        // 말풍선을 클릭/터치하면 해당 메시지에 답장하는 모드로 전환
+        b.onclick = () => {
+          setReply(d.name, d.text);
+        };
+
         line.appendChild(b);
 
         // 삭제 버튼
@@ -361,7 +469,10 @@ if (room && nickname) {
             const delBtn = document.createElement("button");
             delBtn.innerHTML = "✕";
             delBtn.className = "del-btn";
-            delBtn.onclick = () => { if(confirm("삭제할까요?")) remove(ref(db, `chat/${room}/messages/${msgKey}`)); };
+            delBtn.onclick = (e) => { 
+              e.stopPropagation(); // 답장 이벤트가 같이 발동되지 않도록 방지
+              if(confirm("삭제할까요?")) remove(ref(db, `chat/${room}/messages/${msgKey}`)); 
+            };
             line.appendChild(delBtn);
           }
         });
