@@ -1,91 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>chatting with . . .</title>
 
 <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT.css" rel="stylesheet">
 
 <style>
-body { font-family: 'SUIT', sans-serif; background: #ececec; }
+* { box-sizing: border-box; }
 
-#enterScreen {
-  max-width: 320px; margin: 80px auto; padding: 24px;
-  background: white; border-radius: 16px; text-align: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+body { 
+  font-family: 'SUIT', sans-serif; 
+  background: #f4f4f6; 
+  margin: 0; 
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
-#chatBox { max-width: 400px; margin: 20px auto; display: none; }
+/* 입장 화면 */
+#enterScreen {
+  width: 90%;
+  max-width: 360px;
+  padding: 28px 20px;
+  background: white;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+#enterScreen h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+/* 채팅 상자 (모바일 기기 전체 대응) */
+#chatBox { 
+  width: 100%;
+  max-width: 420px; 
+  height: 100vh;
+  height: 100dvh; /* 모바일 주소창 높이 변화 대응 */
+  background: white;
+  display: none; 
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+#roomTitle {
+  margin: 0;
+  padding: 16px;
+  font-size: 1.1rem;
+  background: #ffffff;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
 
 #chat {
-  background: #ecdff5; padding: 10px; height: 400px;
-  overflow-y: auto; border-radius: 10px; display: flex; flex-direction: column;
+  flex: 1;
+  background: #ecdff5; 
+  padding: 12px; 
+  overflow-y: auto; 
+  display: flex; 
+  flex-direction: column;
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
 }
 
+/* 말풍선 및 레이아웃 */
 .bubble {
-  max-width: 75%; padding: 10px 15px; font-size: 14px;
-  line-height: 1.4; position: relative;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 10px 14px; 
+  font-size: 14px;
+  line-height: 1.45; 
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.me { background: #664b7d; color: white; border-radius: 18px 2px 18px 18px; align-self: flex-end; }
-.other { background: white; color: #333; border-radius: 2px 18px 18px 18px; align-self: flex-start; }
+.me { 
+  background: #664b7d; 
+  color: white; 
+  border-radius: 18px 2px 18px 18px; 
+}
 
-.name { font-size: 16px; font-weight: bold; color: #444; margin-bottom: 2px; margin-left: 5px; margin-top: 15px; }
-.time { font-size: 10px; opacity: 0.6; margin-top: 1px; }
+.other { 
+  background: white; 
+  color: #333; 
+  border-radius: 2px 18px 18px 18px; 
+}
 
-/* 시간 정렬 */
+.name { 
+  font-size: 13px; 
+  font-weight: bold; 
+  color: #555; 
+  margin-bottom: 4px; 
+  margin-left: 2px;
+}
+
+.time { 
+  font-size: 10px; 
+  opacity: 0.6; 
+  margin-top: 3px; 
+}
+
 .me + .time { text-align: right; width: 100%; }
 .other + .time { text-align: left; width: 100%; }
 
-/* 공지사항 스타일 */
+/* 공지사항 */
 #noticeArea {
-  background: rgba(102, 75, 125, 0.9); color: white; padding: 10px;
-  border-radius: 8px; margin-bottom: 10px; font-size: 13px;
-  display: none; position: sticky; top: 0; z-index: 10;
+  background: rgba(102, 75, 125, 0.95); 
+  color: white; 
+  padding: 10px 14px;
+  border-radius: 10px; 
+  margin-bottom: 10px; 
+  font-size: 13px;
+  display: none; 
+  position: sticky; 
+  top: 0; 
+  z-index: 10;
+  backdrop-filter: blur(4px);
 }
 
-/* 삭제 버튼: 흰색 배경 + 분홍빛 보라색 글씨 */
+/* 삭제 버튼 */
 .del-btn {
-  background: white !important;    /* 배경 흰색 */
-  color: #D576FF !important;       /* 분홍색 계열 보라색 */
-  border: 1px solid #D576FF;       /* 테두리도 같은 색으로 살짝 */
-  font-size: 12px;
+  background: white !important;
+  color: #D576FF !important;
+  border: 1px solid #D576FF;
+  font-size: 11px;
   font-weight: bold;
   cursor: pointer;
   width: 22px;
   height: 22px;
-  border-radius: 50%;              /* 동그란 버튼 모양 */
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 살짝 입체감 */
-  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform 0.1s;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.del-btn:hover {
-  background: #fdf5ff !important;  /* 마우스 올리면 아주 연한 보라색 배경 */
-  transform: scale(1.1);           /* 살짝 커지는 효과 */
+.del-btn:active {
+  transform: scale(0.9);
 }
-  
-/* 푸터 스타일 수정 */
+
+/* 입력창 및 푸터 */
+input { 
+  width: 100%; 
+  margin: 6px 0; 
+  padding: 12px 16px; 
+  border-radius: 24px; 
+  border: 1px solid #e2e2e2; 
+  outline: none; 
+  font-size: 16px; /* 모바일 입력 시 줌인 방지 */
+  background: #f9f9f9;
+}
+
+input:focus {
+  background: white;
+  border-color: #664b7d;
+}
+
+button { 
+  width: 100%; 
+  padding: 12px; 
+  border-radius: 24px; 
+  border: none; 
+  background: #664b7d; 
+  color: white; 
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer; 
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  opacity: 0.85;
+}
+
+#inputArea { 
+  display: flex; 
+  gap: 8px; 
+  padding: 10px 12px;
+  background: white;
+  border-top: 1px solid #eee;
+}
+
+#inputArea input { flex: 1; margin: 0; }
+#inputArea button { width: auto; padding: 0 18px; flex-shrink: 0; }
+
 .footer { 
   text-align: center; 
   font-size: 11px; 
-  color: #bbb; /* 색상을 조금 더 연하게 조정 */
-  margin-top: 15px; 
-  margin-bottom: 10px; 
-  letter-spacing: 0.5px; 
-  word-break: keep-all; /* 주소 등이 끊기지 않게 */
+  color: #aaa; 
+  padding: 8px 0;
+  word-break: keep-all; 
 }
-
-input { width: 100%; margin: 6px 0; padding: 10px; border-radius: 20px; border: none; outline: none; box-sizing: border-box; }
-button { width: 100%; padding: 10px; border-radius: 20px; border: none; background: #664b7d; color: white; cursor: pointer; }
-
-#inputArea { display: flex; gap: 8px; margin-top: 8px; }
-#inputArea input { flex: 1; }
-#inputArea button { width: auto; padding: 10px 15px; }
 </style>
 </head>
 
@@ -95,14 +207,15 @@ button { width: 100%; padding: 10px; border-radius: 20px; border: none; backgrou
   <h3>Hello! chatting with your friends!</h3>
   <input id="nickname" placeholder="Nickname">
   <input id="roomInput" placeholder="Chatting room name">
-  <button onclick="enterRoom()">Let's go!</button>
+  <button onclick="enterRoom()" style="margin-top: 8px;">Let's go!</button>
   <div class="footer" style="margin-top: 20px;">made by 유수채 - 문의는 instagram @weso.alive</div>
 </div>
 
 <div id="chatBox">
   <h3 id="roomTitle"></h3>
-  <div id="noticeArea">📌 공지: <span id="noticeText"></span></div>
-  <div id="chat"></div>
+  <div id="chat">
+    <div id="noticeArea">📌 공지: <span id="noticeText"></span></div>
+  </div>
   <div id="inputArea">
     <input id="msg" placeholder="메시지 입력">
     <button onclick="send()">전송</button>
@@ -132,7 +245,7 @@ window.enterRoom = () => {
 
 if (room && nickname) {
   enterScreen.style.display = "none";
-  chatBox.style.display = "block";
+  chatBox.style.display = "flex";
   roomTitle.textContent = `💬 ${room}`;
 
   import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js").then(({ initializeApp }) => {
@@ -152,27 +265,27 @@ if (room && nickname) {
       let isHost = false;
 
       // [방장 확인 로직]
-get(infoRef).then((snapshot) => {
-  if (!snapshot.exists()) {
-    const hostPw = prompt("이 방의 방장 비밀번호를 설정하세요:");
-    if (hostPw) {
-      set(infoRef, { host: nickname, pw: hostPw });
-      isHost = true; // 여기서 true 설정
-      roomTitle.innerHTML += ` <span style="font-size:12px; color:gold;">👑 방장</span>`;
-    }
-  } else {
-    const data = snapshot.val();
-    if (data.host === nickname) {
-      const inputPw = prompt("방장 비밀번호를 입력하세요:");
-      if (inputPw === data.pw) {
-        isHost = true; // 여기서 true 설정
-        roomTitle.innerHTML += ` <span style="font-size:12px; color:gold;">👑 방장</span>`;
-      } else {
-        alert("비밀번호가 틀려 일반 유저로 입장합니다.");
-      }
-    }
-  }
-}).catch(err => console.error("방장 확인 에러:", err));
+      get(infoRef).then((snapshot) => {
+        if (!snapshot.exists()) {
+          const hostPw = prompt("이 방의 방장 비밀번호를 설정하세요:");
+          if (hostPw) {
+            set(infoRef, { host: nickname, pw: hostPw });
+            isHost = true;
+            roomTitle.innerHTML += ` <span style="font-size:12px; color:gold;">👑 방장</span>`;
+          }
+        } else {
+          const data = snapshot.val();
+          if (data.host === nickname) {
+            const inputPw = prompt("방장 비밀번호를 입력하세요:");
+            if (inputPw === data.pw) {
+              isHost = true;
+              roomTitle.innerHTML += ` <span style="font-size:12px; color:gold;">👑 방장</span>`;
+            } else {
+              alert("비밀번호가 틀려 일반 유저로 입장합니다.");
+            }
+          }
+        }
+      }).catch(err => console.error("방장 확인 에러:", err));
 
       // [공지 실시간 감시]
       onValue(noticeRef, (snap) => {
@@ -188,99 +301,81 @@ get(infoRef).then((snapshot) => {
         const text = msg.value.trim();
         if (!text) return;
 
-        
-if (text.startsWith("/공지")) {
-    if (isHost) {
-      const noticeMsg = text.replace("/공지", "").trim();
-      set(noticeRef, noticeMsg);
-      msg.value = "";
-      alert("공지가 등록되었습니다."); // 등록 확인용 알림
-      return;
-    } else {
-      alert("공지 권한이 없습니다 (방장 전용).");
-    }
-  }
+        if (text.startsWith("/공지")) {
+          if (isHost) {
+            const noticeMsg = text.replace("/공지", "").trim();
+            set(noticeRef, noticeMsg);
+            msg.value = "";
+            alert("공지가 등록되었습니다.");
+            return;
+          } else {
+            alert("공지 권한이 없습니다 (방장 전용).");
+          }
+        }
 
-  push(chatRef, { name: nickname, text: text, time: Date.now() });
-  msg.value = "";
-};
+        push(chatRef, { name: nickname, text: text, time: Date.now() });
+        msg.value = "";
+      };
       
       msg.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
-// [메시지 수신 - 중복 제거 및 레이아웃 교정 버전]
-onChildAdded(chatRef, snap => {
-  const d = snap.val();
-  const msgKey = snap.key;
-  const isMe = d.name === nickname;
+      // [메시지 수신]
+      onChildAdded(chatRef, snap => {
+        const d = snap.val();
+        const msgKey = snap.key;
+        const isMe = d.name === nickname;
 
-  const wrapper = document.createElement("div");
-  wrapper.id = `wrapper-${msgKey}`;
-  wrapper.style.marginBottom = "15px";
-  wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "column";
-  wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
-  wrapper.style.width = "100%";
+        const wrapper = document.createElement("div");
+        wrapper.id = `wrapper-${msgKey}`;
+        wrapper.style.marginBottom = "12px";
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.style.alignItems = isMe ? "flex-end" : "flex-start";
+        wrapper.style.width = "100%";
 
-  if (!isMe) {
-    const n = document.createElement("div");
-    n.className = "name";
-    get(infoRef).then(infoSnap => {
-      n.textContent = (infoSnap.exists() && infoSnap.val().host === d.name) ? `👑 ${d.name}` : d.name;
-    });
-    wrapper.appendChild(n);
-  }
+        if (!isMe) {
+          const n = document.createElement("div");
+          n.className = "name";
+          get(infoRef).then(infoSnap => {
+            n.textContent = (infoSnap.exists() && infoSnap.val().host === d.name) ? `👑 ${d.name}` : d.name;
+          });
+          wrapper.appendChild(n);
+        }
 
-  // [수정 포인트] 가로 상자가 필요한 만큼만 가로 길이를 가지도록 설정
-  const line = document.createElement("div");
-  line.style.display = "flex";
-  line.style.alignItems = "flex-end";
-  line.style.gap = "8px";
-  line.style.flexDirection = isMe ? "row-reverse" : "row";
-  line.style.width = "max-content"; // 핵심: 내용물만큼만 가로 길이 차지
-  line.style.maxWidth = "85%";     // 화면의 85% 넘지 않게
+        const line = document.createElement("div");
+        line.style.display = "flex";
+        line.style.alignItems = "flex-end";
+        line.style.gap = "6px";
+        line.style.flexDirection = isMe ? "row-reverse" : "row";
+        line.style.maxWidth = "80%";
 
-  const b = document.createElement("div");
-  b.className = "bubble " + (isMe ? "me" : "other");
-  b.textContent = d.text;
-  
-  // 말풍선 스타일 보강 (세로 방지)
-  b.style.display = "block";
-  b.style.margin = "0";
-  b.style.wordBreak = "break-word"; // 긴 문장은 줄바꿈
-  line.appendChild(b);
+        const b = document.createElement("div");
+        b.className = "bubble " + (isMe ? "me" : "other");
+        b.textContent = d.text;
+        b.style.wordBreak = "break-word";
+        line.appendChild(b);
 
-  // 삭제 버튼 로직
-  get(infoRef).then(infoSnap => {
-    if (infoSnap.exists() && infoSnap.val().host === nickname) {
-      const delBtn = document.createElement("button");
-      delBtn.innerHTML = "✕";
-      delBtn.className = "del-btn";
-      
-      // 버튼 모양 완전 고정
-      delBtn.style.flexShrink = "0"; 
-      delBtn.style.width = "22px";   
-      delBtn.style.height = "22px";  
-      delBtn.style.padding = "0";
-      delBtn.style.margin = "0";
-      delBtn.style.display = "inline-flex";
-      delBtn.style.alignItems = "center";
-      delBtn.style.justifyContent = "center";
-      
-      delBtn.onclick = () => { if(confirm("삭제할까요?")) remove(ref(db, `chat/${room}/messages/${msgKey}`)); };
-      line.appendChild(delBtn);
-    }
-  });
+        // 삭제 버튼
+        get(infoRef).then(infoSnap => {
+          if (infoSnap.exists() && infoSnap.val().host === nickname) {
+            const delBtn = document.createElement("button");
+            delBtn.innerHTML = "✕";
+            delBtn.className = "del-btn";
+            delBtn.onclick = () => { if(confirm("삭제할까요?")) remove(ref(db, `chat/${room}/messages/${msgKey}`)); };
+            line.appendChild(delBtn);
+          }
+        });
 
-  wrapper.appendChild(line);
+        wrapper.appendChild(line);
 
-  const tm = document.createElement("div");
-  tm.className = "time";
-  tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  wrapper.appendChild(tm);
+        const tm = document.createElement("div");
+        tm.className = "time";
+        tm.textContent = new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        wrapper.appendChild(tm);
 
-  chat.appendChild(wrapper);
-  chat.scrollTop = chat.scrollHeight;
-});
+        chat.appendChild(wrapper);
+        chat.scrollTop = chat.scrollHeight;
+      });
       
       // [실시간 삭제 반영]
       onChildRemoved(chatRef, snap => {
@@ -294,12 +389,3 @@ onChildAdded(chatRef, snap => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
